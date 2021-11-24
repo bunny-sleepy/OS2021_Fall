@@ -23,13 +23,21 @@ public:
     void budget_claim(std::map<RESOURCE, int> budget);
     int request(RESOURCE, int amount);
     void release(RESOURCE, int amount);
+    bool bank();
+    std::map<std::thread::id, int> alloc;
 private:
     std::map<RESOURCE, int> resource_amount;
     std::map<RESOURCE, std::mutex> resource_mutex;
+    std::map<std::thread::id, std::map<RESOURCE, int>> max_res;
+    std::map<std::thread::id, std::map<RESOURCE, int>> alloc_res;
+    std::mutex max_mutex;
+    std::mutex alloc_mutex;
+    std::mutex bank_mutex;
+    std::condition_variable bank_cv;
     std::map<RESOURCE, std::condition_variable> resource_cv;
     ThreadManager *tmgr;
 };
 
-}  // namespce: proj2
+}  // namespce proj2
 
-#endif
+#endif // DEADLOCK_LIB_RESOURCE_MANAGER_H_

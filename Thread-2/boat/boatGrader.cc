@@ -1,14 +1,14 @@
-#include<string>
+#include <string>
 
 #include "boatGrader.h" 
 
 namespace proj2 {
-	BoatGrader::BoatGrader(int i, int j){
-		boatAssert(j >=2, "invalid children num", CONDITION_MISMATCH);
-    	childrenInit = j;
-    	adultInit=i;
-        children_on_oahu = j;
-        adults_on_oahu = i;
+	BoatGrader::BoatGrader(int adult_num, int child_num) {
+		boatAssert(child_num >= 2, "invalid children num", CONDITION_MISMATCH);
+    	childrenInit = child_num;
+    	adultInit = adult_num;
+        children_on_oahu = child_num;
+        adults_on_oahu = adult_num;
         children_on_molokai = 0;
         adults_on_molokai = 0;
         passenger_spaces = 1;
@@ -16,18 +16,18 @@ namespace proj2 {
         boat_on_oahu = true;
         error_occured = false;
     }
-    void BoatGrader:: initializeChild(){
+    void BoatGrader::initializeChild() {
 		printf("A child has been created.\n");
 	}
 	
-	//NEW ADDITION FOR 2014
-	void BoatGrader:: initializeAdult(){
+	// NEW ADDITION FOR 2014
+	void BoatGrader::initializeAdult() {
 		printf("An adult has been created.\n");
 	}
 
     /* ChildRowToMolokai should be called when a child pilots the boat
        from Oahu to Molokai */
-    void BoatGrader:: ChildRowToMolokai() {
+    void BoatGrader::ChildRowToMolokai() {
         boatAssert(children_on_oahu > 0 && boat_on_oahu && childrenInit > 0, "wrong Child rowing to Molokai.\n", CONDITION_MISMATCH);
         children_on_oahu--;
         children_on_molokai++;
@@ -38,7 +38,7 @@ namespace proj2 {
 
     /* ChildRowToOahu should be called when a child pilots the boat
        from Molokai to Oahu*/
-    void BoatGrader:: ChildRowToOahu() {
+    void BoatGrader::ChildRowToOahu() {
     	boatAssert(children_on_molokai > 0 && !boat_on_oahu && childrenInit > 0, "wrong Child rowing to Oahu.\n", CONDITION_MISMATCH);
         children_on_molokai--;
         children_on_oahu++;
@@ -49,7 +49,7 @@ namespace proj2 {
 
     /* ChildRideToMolokai should be called when a child not piloting
        the boat disembarks on Molokai */
-    void BoatGrader:: ChildRideToMolokai() {
+    void BoatGrader::ChildRideToMolokai() {
     	boatAssert(children_on_oahu > 0 && passenger_spaces > 0 && childrenInit > 0, "wrong Child arrived on Molokai as a passenger.\n", CONDITION_MISMATCH);
         children_on_oahu--;
         children_on_molokai++;
@@ -59,7 +59,7 @@ namespace proj2 {
 
     /* ChildRideToOahu should be called when a child not piloting
        the boat disembarks on Oahu */
-    void BoatGrader:: ChildRideToOahu() {
+    void BoatGrader::ChildRideToOahu() {
     	boatAssert(children_on_molokai > 0 && passenger_to_oahu > 0 && childrenInit > 0, "wrong Child arrived on Oahu as a passenger.\n", CONDITION_MISMATCH);
         children_on_molokai--;
         children_on_oahu++;
@@ -69,7 +69,7 @@ namespace proj2 {
 
     /* AdultRowToMolokai should be called when a adult pilots the boat
        from Oahu to Molokai */
-    void BoatGrader:: AdultRowToMolokai() {
+    void BoatGrader::AdultRowToMolokai() {
     	boatAssert(adults_on_oahu > 0 && boat_on_oahu && adultInit > 0, "wrong Adult rowing to Molokai.\n", CONDITION_MISMATCH);
         adults_on_oahu--;
         adults_on_molokai++;
@@ -79,7 +79,7 @@ namespace proj2 {
 
     /* AdultRowToOahu should be called when a adult pilots the boat
        from Molokai to Oahu */
-    void BoatGrader:: AdultRowToOahu() {
+    void BoatGrader::AdultRowToOahu() {
     	boatAssert(adults_on_molokai > 0 && !boat_on_oahu && adultInit > 0, "wrong Adult rowing to Oahu.\n", CONDITION_MISMATCH);
         adults_on_oahu++;
         adults_on_molokai--;
@@ -89,7 +89,7 @@ namespace proj2 {
 
     /* AdultRideToMolokai should be called when an adult not piloting
        the boat disembarks on Molokai */
-    void BoatGrader:: AdultRideToMolokai() {
+    void BoatGrader::AdultRideToMolokai() {
     	boatAssert(false, "adult can not ride as passenger", ADULT_RIDE);
         error_occured = true;
 		printf("**Adult arrived on Molokai as a passenger.\n");
@@ -97,7 +97,7 @@ namespace proj2 {
 
     /* AdultRideToOahu should be called when an adult not piloting
        the boat disembarks on Oahu */
-    void BoatGrader:: AdultRideToOahu() {
+    void BoatGrader::AdultRideToOahu() {
     	boatAssert(false, "adult can not ride as passenger", ADULT_RIDE);
         error_occured = true;
 		printf("**Adult arrived on Oahu as a passenger.\n");
@@ -112,12 +112,12 @@ namespace proj2 {
         return children_on_oahu;
     }
 
-    bool BoatGrader:: passed() {
+    bool BoatGrader::passed() {
         return children_on_oahu == 0 && adults_on_oahu == 0;
     }
 
     int BoatGrader::points() {
-        if(error_occured)
+        if (error_occured)
             return 0;
         return children_on_oahu != 0 || adults_on_oahu != 0 ? 1 : 2;
     }
