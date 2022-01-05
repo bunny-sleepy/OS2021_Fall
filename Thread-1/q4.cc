@@ -1,4 +1,4 @@
-#include "q5.hh"
+#include "q4.hh"
 
 std::vector<std::thread> thread_list;
 std::vector<proj1::my_cv*> user_resources;
@@ -18,15 +18,6 @@ void my_cv::check_and_lock() {
     this->busy = true;
 }
 
-bool my_cv::test_and_lock() {
-    std::unique_lock<std::mutex> lck(this->mtx);
-    if (this->busy) {
-        return false;
-    }
-    this->busy = true;
-    return true;
-}
-
 void my_cv::check_and_lock_with_epoch(int epoch) {
     // want the resouces, lock this; if the resouce is busy, wait until the lock is open and the process is notified.
     std::unique_lock<std::mutex> lck(this->mtx);
@@ -36,6 +27,7 @@ void my_cv::check_and_lock_with_epoch(int epoch) {
     this->busy = true;
 }
 
+// TODO: update this
 void my_cv::check_and_lock_with_iter(int iter_idx) {
     std::unique_lock<std::mutex> lck(this->mtx);
     while (this->busy || iter_idx >= global_record->global_epoch) {
@@ -52,15 +44,6 @@ bool my_cv::test_and_lock_with_epoch(int epoch) {
     this->busy = true;
     return true;
 }
-
-bool my_cv::wait() {
-    std::unique_lock<std::mutex> lck(this->mtx);
-    while (this->busy) {
-        this->cv.wait(lck);
-    }
-    return true;
-}
-
 
 bool my_cv::wait_with_epoch(int epoch) {
     // check whether the resource is ready, if not, wait.
@@ -114,34 +97,6 @@ void require_resources(int user_idx, int item_idx, int epoch) {
         }
         else {
             user_resources[user_idx]->unlock_and_notify();
-        }
-    }
-}
-
-void require_resources_recommendation(int user_idx, std::vector<int> item_idx_list, int iter_idx) {
-    while (true) {
-        user_resources[user_idx]->check_and_lock_with_iter(iter_idx);
-        for (auto item_idx : item_idx_list) {
-            item_resources[item_idx]->wait();
-        }
-        bool flag = false;
-        for (unsigned int j = 0; j < item_idx_list.size(); ++j) {
-            if (item_resources[item_idx_list[j]]->test_and_lock()) {
-                flag = false;
-            }
-            else {
-                flag = true;
-                for (int i = j - 1; i >= 0; --i) {
-                    item_resources[item_idx_list[i]]->unlock_and_notify();
-                }
-            }
-        }
-        if (!flag) {
-            return;
-        }
-        else {
-            user_resources[user_idx]->unlock_and_notify();
-            user_resources[user_idx]->notify_all();
         }
     }
 }
@@ -220,23 +175,18 @@ void run_one_instruction(Instruction inst, EmbeddingHolder* users, EmbeddingHold
             int user_idx = inst.payloads[0];
             std::vector<Embedding*> item_pool;
             int iter_idx = inst.payloads[1];
-            std::vector<int> item_idx_list;
+            user_resources[user_idx]->check_and_lock_with_iter(iter_idx);
+            Embedding* user = users->get_embedding(user_idx);
+            user_resources[user_idx]->unlock_and_notify();
+            user_resources[user_idx]->notify_all();
             for (unsigned int i = 2; i < inst.payloads.size(); ++i) {
                 int item_idx = inst.payloads[i];
-                item_idx_list.push_back(item_idx);
-            }
-            require_resources_recommendation(user_idx, item_idx_list, iter_idx);
-            Embedding* user = users->get_embedding(user_idx);
-            for (unsigned int i = 2; i < inst.payloads.size(); ++i) {
-                item_pool.push_back(items->get_embedding(inst.payloads[i]));
+                item_resources[item_idx]->check_and_lock();
+                item_pool.push_back(items->get_embedding(item_idx));
+                item_resources[item_idx]->unlock_and_notify();
             }
             Embedding* recommendation = recommend(user, item_pool);
             global_record->write_recommend(recommendation);
-            for (unsigned int i = 2; i < inst.payloads.size(); ++i) {
-                item_resources[inst.payloads[i]]->unlock_and_notify();
-            }
-            user_resources[user_idx]->unlock_and_notify();
-            user_resources[user_idx]->notify_all();
             break;
         }
     }

@@ -7,7 +7,7 @@
 std::string filename = "format.out";
 int len = 16, lines = 48;
 
-int main(){
+int main() {
     std::string line;
     std::ifstream ifs(filename);
     int length = 0, cnt = 0;
