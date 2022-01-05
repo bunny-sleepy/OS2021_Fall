@@ -5,3 +5,48 @@ option objc_class_prefix = "MMA";
 package mma;
 
 // define your service here
+
+service RemoteMma {
+  rpc ReadPage (ReadRequest) returns (ReadReply){}
+  rpc WritePage (WriteRequest) returns (WriteReply){}
+  rpc Allocate (AllocateRequest) returns (AllocateReply){}
+  rpc Free (FreeRequest) returns (FreeReply){}
+
+}
+
+message ReadRequest {
+    int32 array_id = 1; 
+    int32 virtual_pid = 2; 
+    int32 offset = 3;
+}
+  
+message ReadReply {
+    int32 result = 1;
+}
+
+message WriteRequest {
+    int32 array_id = 1;
+    int32 virtual_pid = 2; 
+    int32 offset = 3;
+    int32 value = 4;
+}
+  
+message WriteReply {
+    int32 result = 1;
+}
+
+message AllocateRequest {
+    int32 size = 1;
+}
+
+message AllocateReply {
+    int32 idx = 1;
+}
+
+message FreeRequest {
+    int32 idx = 1;
+}
+
+message FreeReply {
+    int32 result = 1;
+}

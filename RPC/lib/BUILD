@@ -9,6 +9,7 @@ cc_library(
     hdrs = [
         "mma_client.h",
         "array_list.h",
+        "memory_manager.h"
         ],
     defines = ["BAZEL_BUILD"],
     deps = [
